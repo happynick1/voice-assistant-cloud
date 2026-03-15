@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 语音助手应用中心</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 60px;
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.3em;
+            opacity: 0.9;
+        }
+
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .app-card {
+            background: white;
+            border-radius: 20px;
+            padding: 50px 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .app-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+        }
+
+        .app-icon {
+            font-size: 5em;
+            margin-bottom: 25px;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .app-card h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .app-card p {
+            color: #666;
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .app-features {
+            text-align: left;
+            margin-bottom: 35px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .app-features li {
+            list-style: none;
+            padding: 8px 0;
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        .app-features li::before {
+            content: '✓ ';
+            color: #52C41A;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .enter-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            border-radius: 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .enter-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #FA8C16 0%, #FFC53D 100%);
+            color: white;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 60px;
+            padding: 30px;
+            opacity: 0.8;
+        }
+
+        .footer a {
+            color: #FFD700;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .apps-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            header h1 {
+                font-size: 2em;
+            }
+
+            .app-card {
+                padding: 40px 30px;
+            }
+
+            .app-icon {
+                font-size: 4em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 语音助手应用中心</h1>
+            <p>一站式服务：插件扩展 + 云端存储</p>
+        </header>
+
+        <div class="apps-grid">
+            <!-- 插件市场 -->
+            <div class="app-card" onclick="location.href='plugins.html'">
+                <div class="badge">热门推荐</div>
+                <div class="app-icon">🎨</div>
+                <h2>插件市场</h2>
+                <p>自定义你的专属语音助手界面</p>
+                <ul class="app-features">
+                    <li>UI 美化插件 - 自定义配色方案</li>
+                    <li>多种主题风格一键切换</li>
+                    <li>布局样式随心调整</li>
+                    <li>持续更新更多功能插件</li>
+                </ul>
+                <a href="plugins.html" class="enter-btn">进入插件市场 →</a>
+            </div>
+
+            <!-- GitHub 云盘 -->
+            <div class="app-card" onclick="location.href='cloud.html'">
+                <div class="badge">跨设备同步</div>
+                <div class="app-icon">☁️</div>
+                <h2>GitHub 云盘</h2>
+                <p>安全可靠的云端文件存储服务</p>
+                <ul class="app-features">
+                    <li>免费 1GB 存储空间</li>
+                    <li>支持文件上传/下载/删除</li>
+                    <li>跨设备实时同步</li>
+                    <li>文件拖拽便捷操作</li>
+                </ul>
+                <a href="cloud.html" class="enter-btn">进入云盘 →</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>💡 提示：两个应用都支持离线使用，数据保存在本地或 GitHub</p>
+            <p>遇到问题？访问 <a href="https://github.com/happynick1" target="_blank">GitHub</a> 获取帮助</p>
+        </div>
+    </div>
+</body>
+</html>
