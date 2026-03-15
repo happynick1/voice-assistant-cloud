@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 插件市场 - 语音助手应用中心</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHei', Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { text-align: center; color: white; padding: 40px 0; }
+        header h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        header p { font-size: 1.2em; opacity: 0.9; }
+        .back-btn { display: inline-block; margin-top: 20px; padding: 12px 30px; background: rgba(255,255,255,0.2); color: white; text-decoration: none; border-radius: 25px; transition: all 0.3s; }
+        .back-btn:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); }
+        .search-box { background: white; border-radius: 50px; padding: 10px 30px; display: flex; align-items: center; margin: 30px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .search-box input { flex: 1; border: none; outline: none; font-size: 16px; padding: 10px; }
+        .search-box button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 30px; border-radius: 25px; cursor: pointer; font-size: 16px; transition: all 0.3s; }
+        .search-box button:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+        .plugins-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; margin-top: 30px; }
+        .plugin-card { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 5px 20px rgba(0,0,0,0.15); transition: all 0.3s; cursor: pointer; position: relative; overflow: hidden; }
+        .plugin-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); }
+        .plugin-card:hover { transform: translateY(-8px); box-shadow: 0 15px 35px rgba(0,0,0,0.25); }
+        .plugin-card h3 { color: #667eea; font-size: 1.5em; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .plugin-icon { font-size: 1.8em; }
+        .plugin-meta { color: #888; font-size: 0.9em; margin-bottom: 15px; display: flex; gap: 15px; flex-wrap: wrap; }
+        .plugin-meta span { display: flex; align-items: center; gap: 5px; }
+        .plugin-desc { color: #555; line-height: 1.8; margin-bottom: 20px; min-height: 60px; }
+        .plugin-tags { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+        .tag { background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%); color: #666; padding: 5px 15px; border-radius: 20px; font-size: 0.85em; font-weight: 500; transition: all 0.3s; }
+        .tag:hover { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .download-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 14px 30px; border-radius: 25px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .download-btn:hover { opacity: 0.9; transform: scale(1.02); box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4); }
+        .success-msg { background: #52C41A; color: white; padding: 15px 30px; border-radius: 10px; margin: 20px 0; animation: slideDown 0.5s ease; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .no-results { text-align: center; color: white; font-size: 1.3em; padding: 40px; background: rgba(255,255,255,0.1); border-radius: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 插件市场</h1>
+            <p>自定义你的专属界面</p>
+            <a href="index.html" class="back-btn">← 返回应用中心</a>
+        </header>
+
+        <div id="messageArea"></div>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="搜索插件..." onkeypress="if(event.keyCode===13) searchPlugins()">
+            <button onclick="searchPlugins()">🔍 搜索</button>
+        </div>
+
+        <div id="pluginsContainer" class="plugins-grid">
+        </div>
+
+        <div class="api-section" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 15px; padding: 30px; margin-top: 50px; color: white;">
+            <h2>📖 使用说明</h2>
+            <div style="margin-top: 20px; line-height: 2;">
+                <p>1️⃣ 点击"下载插件"按钮下载插件</p>
+                <p>2️⃣ 将下载的 <code>.py</code> 文件放入 <code>tool</code> 目录</p>
+                <p>3️⃣ 重启语音助手，进入"插件市场" → "已安装"</p>
+                <p>4️⃣ 点击插件卡片使用功能</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const PLUGINS_DATA = [
+            {
+                "id": "ui_theme_plugin",
+                "name": "UI 美化插件",
+                "version": "1.0.0",
+                "author": "UI Designer",
+                "description": "自定义语音助手的配色方案和布局，支持多种主题风格、字体大小、按钮样式等",
+                "tags": ["UI", "美化", "主题", "布局"],
+                "auto_start": false,
+                "size": "8KB",
+                "downloads": 1250,
+                "icon": "🎨",
+                "githubUrl": "https://github.com/happynick1/Plugins/raw/Plugins/ui_theme_plugin.py"
+            }
+        ];
+
+        const PLUGIN_CODES = {
+            ui_theme_plugin: `# UI 美化插件
+import json
+import os
+import shutil
+import re
+from datetime import datetime
+
+THEME_FILE = "theme_config.json"
+BACKUP_DIR = "theme_backups"
+
+def ui_theme_plugin(self):
+    import tkinter as tk
+    from tkinter import ttk, colorchooser, messagebox
+
+    app_instance=self
+    theme_win = tk.Toplevel(app_instance.win)
+    theme_win.title("🎨 UI 主题美化 - 自定义配色方案")
+    theme_win.geometry("800x600+200+100")
+    theme_win.configure(bg="#F0F2F5")
+
+    preset_themes = [
+        {"name": "默认蓝", "primary": "#3776AB", "secondary": "#7DB3C4", "background": "#F0F2F5", "text": "#333333"},
+        {"name": "科技蓝", "primary": "#1890FF", "secondary": "#40A9FF", "background": "#E6F7FF", "text": "#001529"},
+        {"name": "商务黑", "primary": "#2C3E50", "secondary": "#34495E", "background": "#ECF0F1", "text": "#2C3E50"},
+        {"name": "清新绿", "primary": "#52C41A", "secondary": "#73D13D", "background": "#F6FFED", "text": "#237804"},
+        {"name": "浪漫紫", "primary": "#722ED1", "secondary": "#9254DE", "background": "#F9F0FF", "text": "#391085"},
+        {"name": "暖橙色", "primary": "#FA8C16", "secondary": "#FFC53D", "background": "#FFF7E6", "text": "#AD6800"},
+        {"name": "少女粉", "primary": "#FF69B4", "secondary": "#FFB6C1", "background": "#FFF0F5", "text": "#8B0000"},
+        {"name": "薄荷青", "primary": "#20B2AA", "secondary": "#48D1CC", "background": "#F0FFFF", "text": "#006994"}
+    ]
+
+    title_label = tk.Label(theme_win, text="🎨 UI 主题美化", font=("Microsoft YaHei", 24, "bold"), bg="#F0F2F5", fg="#333333")
+    title_label.pack(pady=20)
+
+    subtitle_label = tk.Label(theme_win, text="选择预设主题或自定义配色方案", font=("Microsoft YaHei", 12), bg="#F0F2F5", fg="#666666")
+    subtitle_label.pack(pady=5)
+
+    preview_frame = tk.Frame(theme_win, bg="white", bd=2, relief="solid")
+    preview_frame.pack(fill="x", padx=50, pady=20)
+
+    preview_label = tk.Label(preview_frame, text="主题预览", font=("Microsoft YaHei", 14, "bold"), bg=preset_themes[0]["primary"], fg="white", pady=10)
+    preview_label.pack(fill="x")
+
+    preview_content = tk.Frame(preview_frame, bg=preset_themes[0]["secondary"], height=100)
+    preview_content.pack(fill="both", expand=True)
+
+    preview_btn = tk.Button(preview_content, text="预览按钮", font=("Microsoft YaHei", 10), bg=preset_themes[0]["primary"], fg="white", bd=0, padx=20, pady=5)
+    preview_btn.place(relx=0.5, rely=0.5, anchor="center")
+
+    themes_frame = tk.Frame(theme_win, bg="#F0F2F5")
+    themes_frame.pack(fill="both", expand=True, padx=50, pady=10)
+
+    def create_theme_buttons():
+        for i, theme in enumerate(preset_themes):
+            row = i // 4
+            col = i % 4
+            btn = tk.Button(themes_frame, text=theme["name"], font=("Microsoft YaHei", 10), bg=theme["primary"], fg="white", bd=0, padx=20, pady=10, command=lambda t=theme: apply_theme(t, preview_label, preview_content, preview_btn))
+            btn.grid(row=row, column=col, padx=10, pady=10, sticky="ew")
+        themes_frame.grid_columnconfigure(0, weight=1)
+        themes_frame.grid_columnconfigure(1, weight=1)
+        themes_frame.grid_columnconfigure(2, weight=1)
+        themes_frame.grid_columnconfigure(3, weight=1)
+
+    create_theme_buttons()
+
+    current_theme = {"selected": preset_themes[0]}
+
+    def apply_theme(theme, preview_title, preview_cnt, preview_button):
+        current_theme["selected"] = theme
+        preview_title.config(bg=theme["primary"])
+        preview_cnt.config(bg=theme["secondary"])
+        preview_button.config(bg=theme["primary"])
+
+    def save_theme():
+        theme = current_theme["selected"]
+        try:
+            replacements = [str(theme["primary"]) + "\\n", str(theme["secondary"]) + "\\n", str(theme["background"]) + "\\n", str(theme["text"])+"\\n"]
+            with open("main_system.txt", 'w', encoding='utf-8') as f:
+                f.writelines(replacements)
+            f.close()
+            self.colors= [theme["primary"],theme["secondary"],theme["background"],theme["text"]]
+            self.setup_ui()
+        except Exception as e:
+            messagebox.showerror("错误", f"❌ 应用主题失败：{str(e)}", parent=theme_win)
+
+    btn_frame = tk.Frame(theme_win, bg="#F0F2F5")
+    btn_frame.pack(pady=20)
+
+    save_btn = tk.Button(btn_frame, text="💾 保存并应用主题", font=("Microsoft YaHei", 14, "bold"), bg="#52C41A", fg="white", bd=0, padx=30, pady=10, command=save_theme)
+    save_btn.pack(side="left", padx=10)
+
+    cancel_btn = tk.Button(btn_frame, text="❌ 取消", font=("Microsoft YaHei", 12), bg="#D9D9D9", fg="#333333", bd=0, padx=20, pady=10, command=theme_win.destroy)
+    cancel_btn.pack(side="left", padx=10)
+
+    tip_label = tk.Label(theme_win, text="💡 提示：应用主题后需要重启语音助手才能看到效果", font=("Microsoft YaHei", 10), bg="#F0F2F5", fg="#999999")
+    tip_label.pack(pady=10)
+
+def README():
+    return [False, "UI 美化插件"]
+`
+        };
+
+        window.onload = function() {
+            displayPlugins(PLUGINS_DATA);
+        };
+
+        function displayPlugins(plugins) {
+            const container = document.getElementById('pluginsContainer');
+            if (plugins.length === 0) {
+                container.innerHTML = '<div class="no-results">😕 未找到相关插件</div>';
+                return;
+            }
+            container.innerHTML = plugins.map(plugin => `
+                <div class="plugin-card" onclick="downloadPlugin('${plugin.id}')">
+                    <h3>
+                        <span class="plugin-icon">${plugin.icon}</span>
+                        ${plugin.name}
+                    </h3>
+                    <div class="plugin-meta">
+                        <span>📦 v${plugin.version}</span>
+                        <span>👤 ${plugin.author}</span>
+                        <span>💾 ${plugin.size}</span>
+                        <span>⬇️ ${plugin.downloads.toLocaleString()}</span>
+                    </div>
+                    <div class="plugin-desc">
+                        ${plugin.description}
+                    </div>
+                    <div class="plugin-tags">
+                        ${plugin.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                    <button class="download-btn">
+                        📥 下载插件
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function searchPlugins() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (!keyword) {
+                displayPlugins(PLUGINS_DATA);
+                return;
+            }
+            const filtered = PLUGINS_DATA.filter(p =>
+                p.name.toLowerCase().includes(keyword) ||
+                p.description.toLowerCase().includes(keyword) ||
+                p.tags.some(tag => tag.toLowerCase().includes(keyword))
+            );
+            displayPlugins(filtered);
+        }
+
+        function downloadPlugin(pluginId) {
+            const plugin = PLUGINS_DATA.find(p => p.id === pluginId);
+            const code = PLUGIN_CODES[pluginId];
+
+            if (plugin && code) {
+                const confirmed = confirm(
+                    `准备下载：${plugin.name}\n\n` +
+                    `版本：v${plugin.version}\n` +
+                    `大小：${plugin.size}\n` +
+                    `作者：${plugin.author}\n\n` +
+                    `下载位置：Downloads 文件夹\n\n` +
+                    `使用说明：\n` +
+                    `1. 将下载的 .py 文件放入 tool 目录\n` +
+                    `2. 重启语音助手\n` +
+                    `3. 在"已安装"标签页点击插件卡片\n\n` +
+                    `💡 也可以直接从 GitHub 下载：\n` +
+                    plugin.githubUrl + "\n\n" +
+                    "是否继续？"
+                );
+
+                if (confirmed) {
+                    const blob = new Blob([code], { type: 'text/x-python' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = pluginId + ".py";
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+
+                    showMessage(`✅ ${plugin.name} 已成功下载！\n\n📁 保存位置：Downloads 文件夹\n\n请将下载的 .py 文件放入 tool 目录，然后在语音助手的"已安装"标签页中使用\n\n💡 GitHub 下载链接：\n${plugin.githubUrl}`);
+                }
+            }
+        }
+
+        function showMessage(message) {
+            const messageArea = document.getElementById('messageArea');
+            messageArea.innerHTML = '<div class="success-msg">' + message.replace(/\n/g, '<br>') + '</div>';
+            setTimeout(() => {
+                messageArea.innerHTML = '';
+            }, 5000);
+        }
+
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchPlugins();
+            }
+        });
+    </script>
+</body>
+</html>
