@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 语音助手插件市场（上传修复版）</title>
+    <style>
+        /* 样式与之前完全一致，为节省篇幅省略，实际使用时请保留原样 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Microsoft YaHei', Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { text-align: center; color: white; padding: 40px 0; }
+        header h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        header p { font-size: 1.2em; opacity: 0.9; }
+        .stats { background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); display: inline-block; padding: 10px 30px; border-radius: 25px; margin-top: 15px; font-size: 0.95em; }
+        .back-btn { display: inline-block; margin-top: 20px; padding: 12px 30px; background: rgba(255,255,255,0.2); color: white; text-decoration: none; border-radius: 25px; transition: all 0.3s; }
+        .back-btn:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); }
+        .search-box { background: white; border-radius: 50px; padding: 10px 30px; display: flex; align-items: center; margin: 30px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .search-box input { flex: 1; border: none; outline: none; font-size: 16px; padding: 10px; }
+        .search-box button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 30px; border-radius: 25px; cursor: pointer; font-size: 16px; transition: all 0.3s; }
+        .search-box button:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+        .plugins-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; margin-top: 30px; }
+        .plugin-card { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 5px 20px rgba(0,0,0,0.15); transition: all 0.3s; cursor: pointer; position: relative; overflow: hidden; }
+        .plugin-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); }
+        .plugin-card:hover { transform: translateY(-8px); box-shadow: 0 15px 35px rgba(0,0,0,0.25); }
+        .plugin-card h3 { color: #667eea; font-size: 1.5em; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .plugin-icon { font-size: 1.8em; }
+        .plugin-meta { color: #888; font-size: 0.9em; margin-bottom: 15px; display: flex; gap: 15px; flex-wrap: wrap; }
+        .plugin-meta span { display: flex; align-items: center; gap: 5px; }
+        .plugin-desc { color: #555; line-height: 1.8; margin-bottom: 20px; min-height: 60px; }
+        .plugin-tags { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+        .tag { background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%); color: #666; padding: 5px 15px; border-radius: 20px; font-size: 0.85em; font-weight: 500; transition: all 0.3s; }
+        .tag:hover { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .download-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 14px 30px; border-radius: 25px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .download-btn:hover { opacity: 0.9; transform: scale(1.02); box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4); }
+        .loading { text-align: center; color: white; font-size: 1.5em; padding: 50px; }
+        .no-results { text-align: center; color: white; font-size: 1.3em; padding: 40px; background: rgba(255,255,255,0.1); border-radius: 15px; }
+        .success-msg { background: #52C41A; color: white; padding: 15px 30px; border-radius: 10px; margin: 20px 0; animation: slideDown 0.5s ease; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .cloud-storage-section { background: rgba(255,255,255,0.95); border-radius: 15px; padding: 30px; margin-top: 30px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .cloud-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #667eea; }
+        .cloud-title { font-size: 1.8em; color: #667eea; font-weight: bold; }
+        .github-badge { background: #24292e; color: white; padding: 8px 15px; border-radius: 20px; font-size: 0.9em; display: flex; align-items: center; gap: 8px; }
+        .storage-info { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; }
+        .storage-bar-container { background: rgba(255,255,255,0.3); border-radius: 10px; height: 25px; margin: 15px 0; overflow: hidden; position: relative; }
+        .storage-bar { background: linear-gradient(90deg, #52C41A 0%, #FA8C16 50%, #F5222D 100%); height: 100%; transition: width 0.5s ease; border-radius: 10px; }
+        .storage-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: bold; font-size: 0.9em; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        .file-list { background: #f9f9f9; border-radius: 10px; padding: 15px; max-height: 400px; overflow-y: auto; }
+        .file-item { background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: all 0.3s; }
+        .file-item:hover { transform: translateX(5px); box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+        .file-info { flex: 1; display: flex; align-items: center; gap: 10px; }
+        .file-icon { font-size: 2em; }
+        .file-details { flex: 1; }
+        .file-name { font-weight: bold; color: #333; margin-bottom: 5px; }
+        .file-meta { font-size: 0.85em; color: #888; }
+        .file-actions { display: flex; gap: 8px; }
+        .file-btn { padding: 6px 15px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.85em; transition: all 0.3s; }
+        .btn-download { background: #1890FF; color: white; }
+        .btn-download:hover { background: #40A9FF; }
+        .btn-delete { background: #F5222D; color: white; }
+        .btn-delete:hover { background: #FF4D4F; }
+        .upload-area { border: 3px dashed #667eea; border-radius: 10px; padding: 30px; text-align: center; margin-bottom: 20px; transition: all 0.3s; cursor: pointer; }
+        .upload-area:hover { background: rgba(102, 126, 234, 0.1); border-color: #764ba2; }
+        .upload-area.dragover { background: rgba(102, 126, 234, 0.2); border-color: #764ba2; transform: scale(1.02); }
+        .upload-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 14px 30px; border-radius: 25px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s; margin-top: 15px; }
+        .upload-btn:hover { opacity: 0.9; transform: scale(1.05); box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4); }
+        .no-files { text-align: center; color: #888; padding: 40px; font-size: 1.1em; }
+        .info-box { background: #E6F7FF; border-left: 4px solid #1890FF; padding: 15px 20px; border-radius: 5px; margin: 20px 0; color: #0050B3; }
+        .warning-msg { background: #FFF7E6; border-left: 4px solid #FA8C16; padding: 15px 20px; border-radius: 5px; margin: 20px 0; color: #AD6800; }
+        .auth-section { background: #f0f2f5; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .auth-input { width: 100%; padding: 12px; border: 2px solid #d9d9d9; border-radius: 8px; font-size: 14px; margin: 10px 0; }
+        .auth-input:focus { border-color: #667eea; outline: none; }
+        .auth-btn { background: linear-gradient(135deg, #24292e 0%, #424a4f 100%); color: white; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s; margin-right: 10px; }
+        .auth-btn:hover { opacity: 0.9; transform: scale(1.05); }
+        .auth-status { display: flex; align-items: center; gap: 10px; margin-top: 15px; padding: 10px; background: white; border-radius: 8px; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #ccc; }
+        .status-dot.connected { background: #52C41A; box-shadow: 0 0 10px #52C41A; }
+        .loading-spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @media (max-width: 768px) { .plugins-grid { grid-template-columns: 1fr; } header h1 { font-size: 2em; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 语音助手云盘</h1>
+            <p>自定义你的专属界面</p>
+            <a href="index.html" class="back-btn">← 返回应用中心</a>
+            <div class="stats">
+                ✨ 已收录 <strong>1</strong> 个插件（含 GitHub 云盘）
+            </div>
+        </header>
+
+        <div id="messageArea"></div>
+
+        <!-- GitHub 云盘功能 -->
+        <div class="cloud-storage-section">
+            <div class="cloud-header">
+                <div class="cloud-title">☁️ GitHub 云盘</div>
+                <div class="github-badge">
+                    <span>🔗</span>
+                    <span>跨设备同步</span>
+                </div>
+            </div>
+
+            <!-- 认证区域 -->
+            <div class="auth-section">
+                <h3 style="margin-bottom: 10px;">🔐 GitHub 认证</h3>
+                <div style="font-size: 0.9em; color: #666; margin-bottom: 15px;">
+                    使用 GitHub Token 访问你的云端存储
+                </div>
+
+                <input type="password" id="githubToken" class="auth-input" placeholder="请输入 GitHub Personal Access Token">
+
+                <div style="margin: 10px 0;">
+                    <button class="auth-btn" onclick="saveToken()">💾 保存 Token</button>
+                    <button class="auth-btn" onclick="clearToken()" style="background: #d9d9d9; color: #333;">🗑️ 清除 Token</button>
+                    <a href="https://github.com/settings/tokens/new" target="_blank" style="text-decoration: none;">
+                        <button class="auth-btn" style="background: #1890FF;">📝 创建 Token</button>
+                    </a>
+                </div>
+
+                <div class="auth-status" id="authStatus">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span id="statusText">未连接</span>
+                </div>
+
+                <div class="info-box" style="margin-top: 15px;">
+                    <strong>📌 Token 创建步骤：</strong><br>
+                    1️⃣ 点击"创建 Token"按钮（或直接访问：<a href="https://github.com/settings/tokens/new" target="_blank" style="color: #1890FF;">https://github.com/settings/tokens/new</a>）<br>
+                    2️⃣ 在 "Note" 栏填写备注（如：Voice Assistant Cloud）<br>
+                    3️⃣ 向下滚动到 "Select scopes" 区域<br>
+                    4️⃣ <strong>勾选 "repo" 权限（最重要！）</strong><br>
+                    5️⃣ 滚动到页面底部，点击绿色 "Generate token" 按钮<br>
+                    6️⃣ 复制生成的 Token（以 <code>ghp_</code> 开头），粘贴到上方输入框<br>
+                    <br>
+                    <strong>⚠️ 重要提示：</strong><br>
+                    • Token 只会显示一次，请立即复制保存<br>
+                    • Token 仅保存在本地浏览器，不会上传到任何服务器<br>
+                    • 可随时在 <a href="https://github.com/settings/tokens" target="_blank" style="color: #1890FF;">Token 管理页面</a> 撤销
+                </div>
+            </div>
+
+            <!-- 存储信息 -->
+            <div class="storage-info" id="storageSection" style="display: none;">
+                <div>GitHub 仓库存储使用情况</div>
+                <div class="storage-bar-container">
+                    <div class="storage-bar" id="storageBar" style="width: 0%"></div>
+                    <div class="storage-text" id="storageText">0 / 1 GB</div>
+                </div>
+                <div style="text-align: center; margin-top: 10px;">
+                    <span id="usedSpace">已用：0 MB</span> |
+                    <span id="freeSpace">剩余：1 GB</span>
+                </div>
+            </div>
+
+            <div class="warning-msg" id="notConnectedMsg">
+                ⚠️ <strong>请先配置 GitHub Token：</strong><br>
+                1. 点击"获取 Token"按钮前往 GitHub<br>
+                2. 创建 Personal Access Token（勾选 repo 权限）<br>
+                3. 将生成的 Token 粘贴到上方输入框并保存<br>
+                4. 文件将上传到你的 GitHub 仓库，支持跨设备访问
+            </div>
+
+            <!-- 上传区域 -->
+            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()" style="display: none;">
+                <div style="font-size: 3em; margin-bottom: 10px;">📤</div>
+                <div style="font-size: 1.2em; color: #667eea; margin-bottom: 10px;">点击或拖拽文件到此处上传</div>
+                <div style="color: #888; font-size: 0.9em;">支持所有文件类型 | 单个文件最大 25MB（GitHub 限制）</div>
+                <input type="file" id="fileInput" style="display: none;" multiple onchange="handleFiles(this.files)">
+                <button class="upload-btn" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">
+                    📁 选择文件
+                </button>
+            </div>
+
+            <!-- 文件列表 -->
+            <div class="file-list" id="fileList">
+                <div class="no-files">📭 暂无文件，请上传</div>
+            </div>
+        </div>
+
+
+
+        <div class="api-section" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 15px; padding: 30px; margin-top: 50px; color: white;">
+            <h2>📖 使用教程</h2>
+            <div style="margin-top: 20px; line-height: 2;">
+                <p><strong>☁️ GitHub 云盘使用说明：</strong></p>
+                <p>1️⃣ 获取 GitHub Token（点击"获取 Token"按钮）</p>
+                <p>2️⃣ 创建 Personal Access Token，勾选 <code>repo</code> 权限</p>
+                <p>3️⃣ 保存 Token 后，上传文件到 GitHub 仓库</p>
+                <p>4️⃣ 在任何设备登录同一 GitHub 账号即可访问文件</p>
+                <p style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.2); border-radius: 8px;">
+                    💡 <strong>优势：</strong>文件存储在 GitHub，永久免费，跨设备同步，无需担心丢失。
+                </p>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 配置 ====================
+        const GITHUB_OWNER = 'happynick1';
+        const GITHUB_REPO = 'voice-assistant-cloud';
+        const DEFAULT_BRANCH = 'main';      // 默认分支，后续会动态检测更新
+        const CLOUD_DIR = 'files';
+
+        // 可变分支（初始为默认值，连接成功后可能更新）
+        let CURRENT_BRANCH = DEFAULT_BRANCH;
+
+        let githubToken = '';
+        let isConnected = false;
+
+        // 插件数据
+        const PLUGINS_DATA = [
+            {
+                "id": "ui_theme_plugin",
+                "name": "UI 美化插件",
+                "version": "1.0.0",
+                "author": "UI Designer",
+                "description": "自定义语音助手的配色方案和布局，支持多种主题风格、字体大小、按钮样式等",
+                "tags": ["UI", "美化", "主题", "布局"],
+                "auto_start": false,
+                "size": "8KB",
+                "downloads": 1250,
+                "icon": "🎨",
+                "githubUrl": "https://github.com/happynick1/Plugins/raw/Plugins/ui_theme_plugin.py"
+            }
+        ];
+
+        // 插件代码（为节省篇幅，此处省略，实际使用时请保留原样）
+        const PLUGIN_CODES = {
+            ui_theme_plugin: `# UI 美化插件 - 完整的配色和布局修改功能
+import json
+import os
+import shutil
+import re
+from datetime import datetime
+THEME_FILE = "theme_config.json"
+BACKUP_DIR = "theme_backups"
+def ui_theme_plugin(self):
+    """打开主题选择器窗口"""
+    import tkinter as tk
+    from tkinter import ttk, colorchooser, messagebox
+    app_instance=self
+    theme_win = tk.Toplevel(app_instance.win)
+    theme_win.title("🎨 UI 主题美化 - 自定义配色方案")
+    theme_win.geometry("800x600+200+100")
+    theme_win.configure(bg="#F0F2F5")
+    preset_themes = [
+        {"name": "默认蓝", "primary": "#3776AB", "secondary": "#7DB3C4", "background": "#F0F2F5", "text": "#333333"},
+        {"name": "科技蓝", "primary": "#1890FF", "secondary": "#40A9FF", "background": "#E6F7FF", "text": "#001529"},
+        {"name": "商务黑", "primary": "#2C3E50", "secondary": "#34495E", "background": "#ECF0F1", "text": "#2C3E50"},
+        {"name": "清新绿", "primary": "#52C41A", "secondary": "#73D13D", "background": "#F6FFED", "text": "#237804"},
+        {"name": "浪漫紫", "primary": "#722ED1", "secondary": "#9254DE", "background": "#F9F0FF", "text": "#391085"},
+        {"name": "暖橙色", "primary": "#FA8C16", "secondary": "#FFC53D", "background": "#FFF7E6", "text": "#AD6800"},
+        {"name": "少女粉", "primary": "#FF69B4", "secondary": "#FFB6C1", "background": "#FFF0F5", "text": "#8B0000"},
+        {"name": "薄荷青", "primary": "#20B2AA", "secondary": "#48D1CC", "background": "#F0FFFF", "text": "#006994"}
+    ]
+    title_label = tk.Label(theme_win, text="🎨 UI 主题美化", font=("Microsoft YaHei", 24, "bold"), bg="#F0F2F5", fg="#333333")
+    title_label.pack(pady=20)
+    subtitle_label = tk.Label(theme_win, text="选择预设主题或自定义配色方案", font=("Microsoft YaHei", 12), bg="#F0F2F5", fg="#666666")
+    subtitle_label.pack(pady=5)
+    preview_frame = tk.Frame(theme_win, bg="white", bd=2, relief="solid")
+    preview_frame.pack(fill="x", padx=50, pady=20)
+    preview_label = tk.Label(preview_frame, text="主题预览", font=("Microsoft YaHei", 14, "bold"), bg=preset_themes[0]["primary"], fg="white", pady=10)
+    preview_label.pack(fill="x")
+    preview_content = tk.Frame(preview_frame, bg=preset_themes[0]["secondary"], height=100)
+    preview_content.pack(fill="both", expand=True)
+    preview_btn = tk.Button(preview_content, text="预览按钮", font=("Microsoft YaHei", 10), bg=preset_themes[0]["primary"], fg="white", bd=0, padx=20, pady=5)
+    preview_btn.place(relx=0.5, rely=0.5, anchor="center")
+    themes_frame = tk.Frame(theme_win, bg="#F0F2F5")
+    themes_frame.pack(fill="both", expand=True, padx=50, pady=10)
+    def create_theme_buttons():
+        for i, theme in enumerate(preset_themes):
+            row = i // 4
+            col = i % 4
+            btn = tk.Button(themes_frame, text=theme["name"], font=("Microsoft YaHei", 10), bg=theme["primary"], fg="white", bd=0, padx=20, pady=10, command=lambda t=theme: apply_theme(t, preview_label, preview_content, preview_btn))
+            btn.grid(row=row, column=col, padx=10, pady=10, sticky="ew")
+        themes_frame.grid_columnconfigure(0, weight=1)
+        themes_frame.grid_columnconfigure(1, weight=1)
+        themes_frame.grid_columnconfigure(2, weight=1)
+        themes_frame.grid_columnconfigure(3, weight=1)
+    create_theme_buttons()
+    current_theme = {"selected": preset_themes[0]}
+    def apply_theme(theme, preview_title, preview_cnt, preview_button):
+        current_theme["selected"] = theme
+        preview_title.config(bg=theme["primary"])
+        preview_cnt.config(bg=theme["secondary"])
+        preview_button.config(bg=theme["primary"])
+    def save_theme():
+        theme = current_theme["selected"]
+        try:
+            replacements = [str(theme["primary"]) + "\\n", str(theme["secondary"]) + "\\n", str(theme["background"]) + "\\n", str(theme["text"])+"\\n"]
+            with open("main_system.txt", 'w', encoding='utf-8') as f:
+                f.writelines(replacements)
+            f.close()
+            self.colors= [theme["primary"],theme["secondary"],theme["background"],theme["text"]]
+            self.setup_ui()
+        except Exception as e:
+            messagebox.showerror("错误", f"❌ 应用主题失败：{str(e)}", parent=theme_win)
+    btn_frame = tk.Frame(theme_win, bg="#F0F2F5")
+    btn_frame.pack(pady=20)
+    save_btn = tk.Button(btn_frame, text="💾 保存并应用主题", font=("Microsoft YaHei", 14, "bold"), bg="#52C41A", fg="white", bd=0, padx=30, pady=10, command=save_theme)
+    save_btn.pack(side="left", padx=10)
+    cancel_btn = tk.Button(btn_frame, text="❌ 取消", font=("Microsoft YaHei", 12), bg="#D9D9D9", fg="#333333", bd=0, padx=20, pady=10, command=theme_win.destroy)
+    cancel_btn.pack(side="left", padx=10)
+    tip_label = tk.Label(theme_win, text="💡 提示：应用主题后需要重启语音助手才能看到效果", font=("Microsoft YaHei", 10), bg="#F0F2F5", fg="#999999")
+    tip_label.pack(pady=10)
+def README():
+    return [False, "UI 美化插件"]
+`
+        };
+
+        // ==================== 初始化 ====================
+        window.onload = function() {
+            checkAuth();
+
+        };
+
+        // ==================== 认证相关 ====================
+        function checkAuth() {
+            const savedToken = localStorage.getItem('github_token');
+            if (savedToken) {
+                githubToken = savedToken;
+                setTimeout(() => testConnection(), 500);
+            } else {
+                updateAuthUI(false);
+            }
+        }
+
+        function saveToken() {
+            const tokenInput = document.getElementById('githubToken');
+            const token = tokenInput.value.trim();
+            if (!token) {
+                showMessage('❌ 请输入有效的 Token');
+                return;
+            }
+            if (!token.startsWith('ghp_') && !token.startsWith('github_pat_')) {
+                showMessage('⚠️ Token 格式可能不正确（应以 ghp_ 或 github_pat_ 开头）');
+            }
+            githubToken = token;
+            localStorage.setItem('github_token', token);
+            showMessage('⏳ 正在测试连接...');
+            testConnection();
+            tokenInput.value = '';
+        }
+
+        function clearToken() {
+            localStorage.removeItem('github_token');
+            githubToken = '';
+            isConnected = false;
+            updateAuthUI(false);
+            document.getElementById('fileList').innerHTML = '<div class="no-files">📭 Token 已清除，请重新连接</div>';
+            document.getElementById('storageSection').style.display = 'none';
+            document.getElementById('uploadArea').style.display = 'none';
+            showMessage('✅ Token 已清除');
+        }
+
+        async function testConnection() {
+            try {
+                // 检查仓库是否存在
+                let repoResponse = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`, {
+                    headers: { 'Authorization': `token ${githubToken}` }
+                });
+
+                if (repoResponse.status === 404) {
+                    showMessage('⏳ 仓库不存在，正在自动创建...');
+                    const createRes = await fetch('https://api.github.com/user/repos', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `token ${githubToken}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            name: GITHUB_REPO,
+                            description: 'Voice Assistant Cloud Storage',
+                            private: true,
+                            auto_init: true
+                        })
+                    });
+                    if (!createRes.ok) {
+                        const err = await createRes.json();
+                        throw new Error(`创建仓库失败：${err.message}`);
+                    }
+                    showMessage('✅ 仓库创建成功，等待初始化...');
+                    await new Promise(r => setTimeout(r, 3000)); // 等待 GitHub 完成初始化
+                } else if (!repoResponse.ok) {
+                    const err = await repoResponse.json();
+                    throw new Error(`仓库访问失败：${err.message}`);
+                } else {
+                    // 获取默认分支并更新 CURRENT_BRANCH
+                    const repoData = await repoResponse.json();
+                    CURRENT_BRANCH = repoData.default_branch || DEFAULT_BRANCH;
+                    console.log('检测到默认分支:', CURRENT_BRANCH);
+                }
+
+                isConnected = true;
+                updateAuthUI(true);
+
+                setupDragDrop();
+
+                // 延迟加载文件列表和存储信息
+                setTimeout(async () => {
+                    await loadFileList();
+                    await updateStorageInfo();
+                }, 1000);
+
+                showMessage('✅ GitHub 连接成功！');
+            } catch (error) {
+                console.error('连接失败:', error);
+                isConnected = false;
+                updateAuthUI(false);
+                showMessage(`❌ 连接失败：${error.message}<br><br>请检查 Token 权限或网络。`);
+            }
+        }
+
+        function updateAuthUI(connected) {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const storageSection = document.getElementById('storageSection');
+            const uploadArea = document.getElementById('uploadArea');
+            const notConnectedMsg = document.getElementById('notConnectedMsg');
+
+            if (connected) {
+                statusDot.classList.add('connected');
+                statusText.textContent = '已连接到 GitHub';
+                storageSection.style.display = 'block';
+                uploadArea.style.display = 'block';
+                notConnectedMsg.style.display = 'none';
+            } else {
+                statusDot.classList.remove('connected');
+                statusText.textContent = '未连接';
+                storageSection.style.display = 'none';
+                uploadArea.style.display = 'none';
+                notConnectedMsg.style.display = 'block';
+            }
+        }
+
+        // ==================== 文件上传/下载/删除 ====================
+        function setupDragDrop() {
+            const uploadArea = document.getElementById('uploadArea');
+            if (!uploadArea) return;
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => {
+                    uploadArea.classList.add('dragover');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => {
+                    uploadArea.classList.remove('dragover');
+                }, false);
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFiles(files);
+            }, false);
+        }
+
+        async function handleFiles(files) {
+            if (!isConnected) {
+                showMessage('❌ 请先连接 GitHub');
+                return;
+            }
+
+            const fileList = Array.from(files);
+            if (fileList.length === 0) {
+                showMessage('❌ 没有选择文件');
+                return;
+            }
+
+            let successCount = 0;
+            let failCount = 0;
+
+            const uploadArea = document.getElementById('uploadArea');
+            const originalContent = uploadArea.innerHTML;
+
+            for (let i = 0; i < fileList.length; i++) {
+                const file = fileList[i];
+
+                if (file.size > 25 * 1024 * 1024) {
+                    showMessage('❌ ' + file.name + ' 文件过大（最大 25MB）');
+                    failCount++;
+                    continue;
+                }
+
+                try {
+                    uploadArea.innerHTML = '<div style="padding: 20px;"><div class="loading-spinner"></div><div style="margin-top: 15px; color: #667eea;">正在上传：' + file.name + ' (' + (i + 1) + '/' + fileList.length + ')</div></div>';
+
+                    await uploadFileToGitHub(file);
+                    successCount++;
+                } catch (error) {
+                    console.error('上传失败:', file.name, error);
+                    showMessage('❌ ' + file.name + ' 上传失败：' + error.message);
+                    failCount++;
+                }
+            }
+
+            uploadArea.innerHTML = originalContent;
+
+            setTimeout(async () => {
+                await loadFileList();
+                await updateStorageInfo();
+            }, 1000);
+
+            const total = fileList.length;
+            if (successCount > 0) {
+                let msg = '✅ 上传完成：' + successCount + '/' + total + ' 成功';
+                if (failCount > 0) msg += '<br>❌ 失败：' + failCount;
+                showMessage(msg);
+            } else if (failCount > 0) {
+                showMessage('❌ 全部上传失败');
+            }
+        }
+
+        // 修复：对文件路径进行 URL 编码，支持特殊字符
+                // 修复：对文件路径进行 URL 编码，支持特殊字符
+        async function uploadFileToGitHub(file) {
+            const reader = new FileReader();
+            return new Promise((resolve, reject) => {
+                reader.onload = async function(e) {
+                    const base64Content = e.target.result.split(',')[1];
+                    const filePath = `${CLOUD_DIR}/${file.name}`;
+
+                    try {
+                        // 检查文件是否存在
+                        let sha = null;
+                        try {
+                            const checkResponse = await fetch(
+                                `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${encodeURIComponent(filePath)}?ref=${CURRENT_BRANCH}`,
+                                {
+                                    headers: {
+                                        'Authorization': `token ${githubToken}`,
+                                        'Accept': 'application/vnd.github.v3+json'
+                                    }
+                                }
+                            );
+                            if (checkResponse.ok) {
+                                const checkData = await checkResponse.json();
+                                sha = checkData.sha;
+                                console.log(`文件已存在，SHA: ${sha}`);
+                            }
+                        } catch (e) {
+                            console.log('文件不存在，将创建新文件');
+                        }
+
+                        const requestBody = {
+                            message: `Upload file: ${file.name}`,
+                            content: base64Content,
+                            branch: CURRENT_BRANCH
+                        };
+                        if (sha) requestBody.sha = sha;
+
+                        const response = await fetch(
+                            `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${encodeURIComponent(filePath)}`,
+                            {
+                                method: 'PUT',
+                                headers: {
+                                    'Authorization': `token ${githubToken}`,
+                                    'Accept': 'application/vnd.github.v3+json',
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(requestBody)
+                            }
+                        );
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            console.error('GitHub API 上传错误:', errorData);
+                            throw new Error(errorData.message || `上传失败 (HTTP ${response.status})`);
+                        }
+
+                        console.log(`文件 ${file.name} 上传成功`);
+                        resolve();
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                reader.onerror = () => reject(new Error('文件读取失败'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+                async function loadFileList() {
+            if (!isConnected) return;
+
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '<div style="text-align: center; padding: 20px;"><div class="loading-spinner"></div><div style="margin-top: 10px;">加载中...</div></div>';
+
+            try {
+                // 使用时间戳参数避免缓存
+                const timestamp = new Date().getTime();
+                const response = await fetch(
+                    `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${CLOUD_DIR}?ref=${CURRENT_BRANCH}&t=${timestamp}`,
+                    {
+                        headers: {
+                            'Authorization': `token ${githubToken}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    }
+                );
+
+                console.log('加载文件列表响应状态:', response.status);
+
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        fileList.innerHTML = '<div class="no-files">📭 目录不存在（首次使用请上传文件）</div>';
+                        return;
+                    } else if (response.status === 401 || response.status === 403) {
+                        fileList.innerHTML = '<div class="no-files">❌ Token 无效或权限不足</div>';
+                        updateAuthUI(false);
+                        return;
+                    } else {
+                        const errorData = await response.json();
+                        throw new Error(`加载失败：${errorData.message || 'HTTP ' + response.status}`);
+                    }
+                }
+
+                const files = await response.json();
+                console.log('获取到的文件:', files);
+
+                if (!Array.isArray(files)) {
+                    fileList.innerHTML = '<div class="no-files">📭 云盘为空，请上传文件</div>';
+                    return;
+                }
+
+                // 过滤有效文件
+                const validFiles = files
+                    .filter(f => f.type === 'file' && f.name !== '.gitkeep' && !f.name.startsWith('.'))
+                    .map(f => ({
+                        name: f.name,
+                        path: f.path,
+                        sha: f.sha,
+                        size: f.size || 0,
+                        downloadUrl: f.download_url
+                    }));
+
+                if (validFiles.length === 0) {
+                    fileList.innerHTML = '<div class="no-files">📭 云盘为空，请上传文件</div>';
+                    return;
+                }
+
+                // 渲染文件列表
+                fileList.innerHTML = validFiles.map((file, index) => `
+                    <div class="file-item" style="animation: slideDown 0.3s ease ${index * 0.05}s both">
+                        <div class="file-info">
+                            <span class="file-icon">${getFileIcon(file.name)}</span>
+                            <div class="file-details">
+                                <div class="file-name" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</div>
+                                <div class="file-meta">
+                                    📦 ${formatSize(file.size)}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="file-actions">
+                            <button class="file-btn btn-download" onclick="event.stopPropagation(); downloadFile('${file.path}', '${escapeHtml(file.name)}')">⬇️ 下载</button>
+                            <button class="file-btn btn-delete" onclick="event.stopPropagation(); deleteFile('${file.path}', '${file.sha}')">🗑️ 删除</button>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('加载文件列表失败:', error);
+                fileList.innerHTML = '<div class="no-files" style="color: #F5222D;">❌ 加载失败<br><br>' + error.message + '</div>';
+            }
+        }
+
+        // 更新存储信息
+        async function updateStorageInfo() {
+            if (!isConnected) {
+                document.getElementById('storageSection').style.display = 'none';
+                return;
+            }
+
+            try {
+                // 先获取文件列表来计算大小
+                const timestamp = new Date().getTime();
+                const filesResponse = await fetch(
+                    `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${CLOUD_DIR}?ref=${CURRENT_BRANCH}&t=${timestamp}`,
+                    {
+                        headers: {
+                            'Authorization': `token ${githubToken}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    }
+                );
+
+                if (!filesResponse.ok) {
+                    resetStorageUI();
+                    return;
+                }
+
+                const files = await filesResponse.json();
+
+                let totalSize = 0;
+
+                if (Array.isArray(files)) {
+                    // 直接从文件列表计算总大小
+                    files.forEach(file => {
+                        if (file.type === 'file' && file.name !== '.gitkeep' && !file.name.startsWith('.')) {
+                            totalSize += file.size || 0;
+                        }
+                    });
+                }
+
+                const maxSize = 1024 * 1024 * 1024; // 1GB
+                const percentage = Math.min((totalSize / maxSize) * 100, 100);
+
+                document.getElementById('storageBar').style.width = percentage + '%';
+                document.getElementById('storageText').textContent = formatSize(totalSize) + ' / 1 GB';
+                document.getElementById('usedSpace').textContent = '已用：' + formatSize(totalSize);
+                document.getElementById('freeSpace').textContent = '剩余：' + formatSize(maxSize - totalSize);
+                document.getElementById('storageSection').style.display = 'block';
+
+            } catch (error) {
+                console.error('获取存储信息失败:', error);
+                resetStorageUI();
+            }
+        }
+
+
+        // 下载文件
+        async function downloadFile(filePath, fileName) {
+            try {
+                const encodedPath = encodeURIComponent(filePath);
+                const response = await fetch(
+                    `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${encodedPath}?ref=${CURRENT_BRANCH}`,
+                    {
+                        headers: {
+                            'Authorization': `token ${githubToken}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || '下载失败');
+                }
+
+                const data = await response.json();
+                const downloadUrl = data.download_url;
+
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                showMessage('✅ ' + fileName + ' 下载开始');
+            } catch (error) {
+                console.error('下载失败:', error);
+                showMessage('❌ 下载失败：' + error.message);
+            }
+        }
+
+        // 删除文件
+        async function deleteFile(filePath, sha) {
+            const fileName = filePath.split('/').pop();
+            const confirmed = confirm(`确定要删除 "${fileName}" 吗？\n\n⚠️ 此操作不可恢复！`);
+            if (!confirmed) return;
+
+            try {
+                const fileList = document.getElementById('fileList');
+                fileList.innerHTML = '<div style="text-align: center; padding: 20px;"><div class="loading-spinner"></div><div style="margin-top: 10px;">正在删除...</div></div>';
+
+                const encodedPath = encodeURIComponent(filePath);
+                const response = await fetch(
+                    `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${encodedPath}`,
+                    {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `token ${githubToken}`,
+                            'Accept': 'application/vnd.github.v3+json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: 'Delete file: ' + fileName,
+                            sha: sha,
+                            branch: CURRENT_BRANCH
+                        })
+                    }
+                );
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || '删除失败');
+                }
+
+                showMessage('✅ "' + fileName + '" 已删除');
+
+                setTimeout(async () => {
+                    await loadFileList();
+                    await updateStorageInfo();
+                }, 800);
+
+            } catch (error) {
+                console.error('删除失败:', error);
+                showMessage('❌ 删除失败：' + error.message);
+                setTimeout(() => loadFileList(), 300);
+            }
+        }
+
+        function resetStorageUI() {
+            document.getElementById('storageBar').style.width = '0%';
+            document.getElementById('storageText').textContent = '0 / 1 GB';
+            document.getElementById('usedSpace').textContent = '已用：0 B';
+            document.getElementById('freeSpace').textContent = '剩余：1 GB';
+        }
+
+        // ==================== 工具函数 ====================
+        function showMessage(message) {
+            const messageArea = document.getElementById('messageArea');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'success-msg';
+            messageDiv.innerHTML = message;
+            messageArea.appendChild(messageDiv);
+
+            // 3 秒后自动消失
+            setTimeout(() => {
+                messageDiv.style.animation = 'slideUp 0.5s ease forwards';
+                setTimeout(() => messageDiv.remove(), 500);
+            }, 3000);
+        }
+
+        // 添加 slideUp 动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideUp {
+                from { opacity: 1; transform: translateY(0); }
+                to { opacity: 0; transform: translateY(-20px); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        function formatSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const icons = {
+                'pdf': '📕', 'doc': '📘', 'docx': '📘', 'txt': '📄',
+                'xls': '📊', 'xlsx': '📊', 'jpg': '🖼️', 'jpeg': '🖼️',
+                'png': '🖼️', 'gif': '🖼️', 'mp3': '🎵', 'wav': '🎵',
+                'mp4': '🎬', 'avi': '🎬', 'zip': '📦', 'rar': '📦',
+                'py': '🐍', 'js': '📜', 'html': '🌐', 'css': '🎨'
+            };
+            return icons[ext] || '📄';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+
+    </script>
+</body>
+</html>
