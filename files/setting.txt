@@ -1,3 +1,2 @@
 -old Media.exe -new Nick's Media图片处理器.exe -more logo_m.ico
 -old Nick's Cartoon.exe -new Nick's Cartoon动画渲染器.exe -more logo.ico logo.png startup.gif
--old Nick's Cartoon2.exe -new Nick's Cartoon动画渲染器2.0.exe -more logo.ico logo.png startup.gif
