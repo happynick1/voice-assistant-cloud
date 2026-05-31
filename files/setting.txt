@@ -1,4 +1,4 @@
 -old Media.exe -new Nick's Media图片处理器.exe -version 1.0 -more logo_m.ico Media.png
 -old Nick's Cartoon.exe -new Nick's Cartoon动画渲染器.exe -version 1.0 -more logo.ico logo.png startup.gif Nick's`Cartoon.png
 -old mytool.exe -new 操行分管理器.exe -version 2.0 -more logo.ico mytool.png
--old aria2c.exe -new aria2加速器.exe -version 1.0 -more logo.ico
+-old aria2c.exe -new aria2加速器.exe -version 1.0 -more aria2c.png
