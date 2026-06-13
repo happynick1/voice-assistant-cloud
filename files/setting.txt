@@ -4,3 +4,4 @@
 -old aria2c.exe -new aria2加速器.exe -version 1.0 -more aria2c.png aria2.png
 -old measurer.exe -new 屏幕小工具.exe -version 1.0 -more measurer.png
 -old function_drawer2.0.exe -new 函数绘图器.exe -version 1.0 -more function_drawer2.0.png
+-old creater.exe -new python打包工具.exe -version 1.0 -more creater.png
